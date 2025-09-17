@@ -1,6 +1,6 @@
-import React from 'react';
-import styled from 'styled-components';
-import { AlertTriangle, RefreshCw } from 'lucide-react';
+import React from "react";
+import styled from "styled-components";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 const ErrorContainer = styled.div`
   min-height: 100vh;
@@ -17,7 +17,7 @@ const ErrorCard = styled.div`
   padding: 40px;
   max-width: 600px;
   text-align: center;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 `;
 
 const ErrorIcon = styled.div`
@@ -85,17 +85,17 @@ const Button = styled.button`
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
 `;
 
 const RetryButton = styled(Button)`
   background: #007bff;
   color: white;
-  
+
   &:hover {
     background: #0056b3;
   }
@@ -104,7 +104,7 @@ const RetryButton = styled(Button)`
 const ReloadButton = styled(Button)`
   background: #28a745;
   color: white;
-  
+
   &:hover {
     background: #1e7e34;
   }
@@ -113,50 +113,52 @@ const ReloadButton = styled(Button)`
 class ErrorBoundary extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { 
-      hasError: false, 
-      error: null, 
+    this.state = {
+      hasError: false,
+      error: null,
       errorInfo: null,
-      isMessagingError: false 
+      isMessagingError: false,
     };
   }
 
   static getDerivedStateFromError(error) {
     // Check if this is a messaging-related error
-    const isMessagingError = error.message && (
-      error.message.includes('tx_attempts_exceeded') ||
-      error.message.includes('tx_ack_timeout') ||
-      error.message.includes('Failed to initialize messaging') ||
-      error.message.includes('chrome-extension')
-    );
-    
-    return { 
-      hasError: true, 
-      isMessagingError 
+    const isMessagingError =
+      error.message &&
+      (error.message.includes("tx_attempts_exceeded") ||
+        error.message.includes("tx_ack_timeout") ||
+        error.message.includes("Failed to initialize messaging") ||
+        error.message.includes("chrome-extension"));
+
+    return {
+      hasError: true,
+      isMessagingError,
     };
   }
 
   componentDidCatch(error, errorInfo) {
     this.setState({
       error,
-      errorInfo
+      errorInfo,
     });
 
     // Log the error for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
+
     // If it's a messaging error, we can try to suppress it
     if (this.state.isMessagingError) {
-      console.warn('Messaging initialization error detected and handled by ErrorBoundary');
+      console.warn(
+        "Messaging initialization error detected and handled by ErrorBoundary"
+      );
     }
   }
 
   handleRetry = () => {
-    this.setState({ 
-      hasError: false, 
-      error: null, 
+    this.setState({
+      hasError: false,
+      error: null,
       errorInfo: null,
-      isMessagingError: false 
+      isMessagingError: false,
     });
   };
 
@@ -176,8 +178,10 @@ class ErrorBoundary extends React.Component {
               </ErrorIcon>
               <ErrorTitle>Browser Extension Conflict Detected</ErrorTitle>
               <ErrorMessage>
-                A browser extension is trying to communicate with this application but is experiencing connection issues. 
-                This doesn't affect the core functionality of the Biomedical Research Platform.
+                A browser extension is trying to communicate with this
+                application but is experiencing connection issues. This doesn't
+                affect the core functionality of the Biomedical Research
+                Platform.
               </ErrorMessage>
               <ActionButtons>
                 <RetryButton onClick={this.handleRetry}>
@@ -203,9 +207,10 @@ class ErrorBoundary extends React.Component {
             </ErrorIcon>
             <ErrorTitle>Something went wrong</ErrorTitle>
             <ErrorMessage>
-              An unexpected error occurred in the application. Please try refreshing the page or contact support if the problem persists.
+              An unexpected error occurred in the application. Please try
+              refreshing the page or contact support if the problem persists.
             </ErrorMessage>
-            
+
             {this.state.error && (
               <ErrorDetails>
                 <ErrorSummary>Error Details (Click to expand)</ErrorSummary>
@@ -215,7 +220,7 @@ class ErrorBoundary extends React.Component {
                 </ErrorStack>
               </ErrorDetails>
             )}
-            
+
             <ActionButtons>
               <RetryButton onClick={this.handleRetry}>
                 <RefreshCw size={20} />

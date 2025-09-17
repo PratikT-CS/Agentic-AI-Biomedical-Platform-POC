@@ -31,20 +31,20 @@ const ResultsContainer = styled.div`
 const ResultsHeader = styled.div`
   background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
   color: white;
-  padding: 20px;
+  padding: 15px 15px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 10px;
 `;
 
 const ResultsTitle = styled.h3`
   margin: 0;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: 600;
 `;
 
 const ResultsBody = styled.div`
-  padding: 20px;
+  padding: 15px;
   flex: 1;
   overflow-y: auto;
 
@@ -69,43 +69,43 @@ const ResultsBody = styled.div`
 
 const SummarySection = styled.div`
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 15px;
-  padding: 15px;
-  margin-bottom: 15px;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 12px;
   border: 1px solid #dee2e6;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 `;
 
 const SummaryGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
 `;
 
 const SummaryCard = styled.div`
   background: white;
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 8px;
+  padding: 12px;
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
   border: 1px solid #e9ecef;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 `;
 
 const SummaryNumber = styled.div`
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
   color: #4facfe;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
 `;
 
 const SummaryLabel = styled.div`
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   color: #6c757d;
   font-weight: 500;
 `;
@@ -118,14 +118,14 @@ const SourcesSection = styled.div`
 
 const SourceCard = styled.div`
   border: 1px solid #e9ecef;
-  border-radius: 15px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 
   &:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   }
 `;
 
@@ -143,7 +143,7 @@ const SourceHeader = styled.div`
     }
   }};
   color: white;
-  padding: 15px 20px;
+  padding: 10px 15px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -153,17 +153,17 @@ const SourceHeader = styled.div`
 const SourceInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 `;
 
 const SourceIcon = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 32px;
+  height: 32px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
+  border-radius: 6px;
 `;
 
 const SourceDetails = styled.div`
@@ -173,12 +173,12 @@ const SourceDetails = styled.div`
 
 const SourceName = styled.h4`
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   font-weight: 600;
 `;
 
 const SourceCount = styled.span`
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   opacity: 0.9;
 `;
 
@@ -197,7 +197,7 @@ const ExpandButton = styled.button`
 `;
 
 const SourceContent = styled.div`
-  padding: 20px;
+  padding: 15px;
   background: white;
   max-height: ${(props) => (props.expanded ? "none" : "0")};
   overflow: hidden;
@@ -583,7 +583,8 @@ const SwissADMEBoiledEggTitle = styled.h4`
 
 const SwissADMEBoiledEggImage = styled.img`
   max-width: 100%;
-  height: auto;
+  height: 100%;
+  overflow: auto;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 `;
@@ -601,13 +602,13 @@ function ResultsView({ results, status }) {
   const getSourceIcon = (source) => {
     switch (source) {
       case "pubmed":
-        return <FileText size={20} />;
+        return <FileText size={16} />;
       case "uniprot":
-        return <Dna size={20} />;
+        return <Dna size={16} />;
       case "swissadme":
-        return <Pill size={20} />;
+        return <Pill size={16} />;
       default:
-        return <Database size={20} />;
+        return <Database size={16} />;
     }
   };
 
@@ -1100,13 +1101,13 @@ function ResultsView({ results, status }) {
             )}
             {item.pmid && <MetaTag>PMID: {item.pmid}</MetaTag>}
           </ResultMeta>
-          {item.abstract && (
+          {/* {item.abstract && (
             <ResultDescription>
               {item.abstract.length > 200
                 ? `${item.abstract.substring(0, 200)}...`
                 : item.abstract}
             </ResultDescription>
-          )}
+          )} */}
           {item.url && (
             <ResultLink
               href={item.url}
@@ -1173,7 +1174,7 @@ function ResultsView({ results, status }) {
     return (
       <ResultsContainer>
         <ResultsHeader>
-          <Database size={20} />
+          <Database size={16} />
           <ResultsTitle>Processing Your Query...</ResultsTitle>
         </ResultsHeader>
         <ResultsBody>
@@ -1190,7 +1191,7 @@ function ResultsView({ results, status }) {
     return (
       <ResultsContainer>
         <ResultsHeader>
-          <Database size={20} />
+          <Database size={16} />
           <ResultsTitle>Query Failed</ResultsTitle>
         </ResultsHeader>
         <ResultsBody>
@@ -1217,7 +1218,7 @@ function ResultsView({ results, status }) {
   return (
     <ResultsContainer>
       <ResultsHeader>
-        <Database size={20} />
+        <Database size={16} />
         <ResultsTitle>Search Results</ResultsTitle>
       </ResultsHeader>
 
@@ -1282,9 +1283,9 @@ function ResultsView({ results, status }) {
                   </SourceInfo>
                   <ExpandButton>
                     {isExpanded ? (
-                      <ChevronDown size={20} />
+                      <ChevronDown size={16} />
                     ) : (
-                      <ChevronRight size={20} />
+                      <ChevronRight size={16} />
                     )}
                   </ExpandButton>
                 </SourceHeader>

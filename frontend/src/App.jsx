@@ -73,7 +73,7 @@ const ContentHeader = styled.div`
 `;
 
 const ContentTitle = styled.h2`
-  font-size: 1.8rem;
+  font-size: 1.6rem;
   // margin-bottom: 10px;
   font-weight: 600;
   margin: 0px;
@@ -88,32 +88,45 @@ const ContentDescription = styled.p`
 
 const ContentBody = styled.div`
   padding: 20px;
+  padding-left: 5px;
   display: flex;
   gap: 20px;
   min-height: 600px;
+  max-height: calc(100vh - 120px);
 
   @media (max-width: 1024px) {
     flex-direction: column;
     gap: 20px;
+    max-height: none;
   }
 `;
 
 const FormSection = styled.div`
   flex: 0 0 35%;
   min-width: 350px;
+  position: sticky;
+  top: 20px;
+  height: fit-content;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 
   @media (max-width: 1024px) {
     flex: 1;
     min-width: auto;
+    position: static;
+    max-height: none;
   }
 `;
 
 const ResultsSection = styled.div`
   flex: 1;
   min-width: 0;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
 
   @media (max-width: 1024px) {
     flex: 1;
+    max-height: none;
   }
 `;
 
@@ -121,7 +134,8 @@ const StatusBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+  margin-left: 15px;
   padding: 10px;
   padding-left: 20px;
   background: #f8f9fa;

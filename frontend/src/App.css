@@ -6,7 +6,7 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 5px;
 }
 
 ::-webkit-scrollbar-track {
@@ -120,7 +120,7 @@
   .main-content {
     margin: 10px;
   }
-  
+
   .content-body {
     padding: 20px;
   }
@@ -132,38 +132,38 @@
     align-items: center;
     gap: 15px;
   }
-  
+
   .feature {
     width: 100%;
     max-width: 300px;
     padding: 8px 16px;
   }
-  
+
   .title {
     font-size: 2rem;
   }
-  
+
   .subtitle {
     font-size: 1rem;
   }
-  
+
   .content-header {
     padding: 20px;
   }
-  
+
   .content-title {
     font-size: 1.5rem;
   }
-  
+
   .content-description {
     font-size: 0.9rem;
   }
-  
+
   .form-section {
     position: static !important;
     max-height: none !important;
   }
-  
+
   .results-section {
     min-height: 400px;
   }
@@ -173,34 +173,34 @@
   .app-container {
     padding: 10px;
   }
-  
+
   .main-content {
     margin: 5px;
     border-radius: 15px;
   }
-  
+
   .content-body {
     padding: 15px;
     gap: 15px;
   }
-  
+
   .form-container {
     padding: 20px;
     border-radius: 15px;
   }
-  
+
   .title {
     font-size: 1.8rem;
   }
-  
+
   .subtitle {
     font-size: 0.9rem;
   }
-  
+
   .content-title {
     font-size: 1.3rem;
   }
-  
+
   .content-description {
     font-size: 0.85rem;
   }

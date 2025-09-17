@@ -316,6 +316,7 @@ class SwissADMEAdapter:
             "druglikeness": {},
             "medicinal_chemistry": {},
             "images": {},
+            "boiled_egg_plot": "",
             "source": "swissadme",
         }
         try:
@@ -518,7 +519,24 @@ class SwissADMEAdapter:
 
                 except Exception as e:
                     logger.info(f"Error extracting images: {e}")
-            
+
+            show_boiled_egg_plot_button = driver.find_element(By.XPATH, "//button[contains(text(), 'BOILED-Egg')]")
+            show_boiled_egg_plot_button.click()
+ 
+            time.sleep(2)
+ 
+            show_labels_checkbox = driver.find_element(By.XPATH, "//input[contains(@type, 'checkbox') and contains(@id, 'showLabels')]")
+            if not show_labels_checkbox.is_selected():
+                show_labels_checkbox.click()
+ 
+            time.sleep(1)
+ 
+            boiled_egg_plot_canvas_div = driver.find_element(By.XPATH, "//div[contains(@id, 'placeholder')]")
+ 
+            boiled_egg_plot_base64_encoded_str = boiled_egg_plot_canvas_div.screenshot_as_base64
+            boiled_egg_plot_base64_encoded_str = "data:image/png;base64," + boiled_egg_plot_base64_encoded_str
+            final_result["boiled_egg_plot"] = boiled_egg_plot_base64_encoded_str
+
             logger.info(f"### FINAL RESULT ###: \n\n{final_result}\n\n")
             final_result["success"] = True
             return final_result
