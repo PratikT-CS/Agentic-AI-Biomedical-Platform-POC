@@ -317,6 +317,7 @@ class SwissADMEAdapter:
             "medicinal_chemistry": {},
             "images": {},
             "boiled_egg_plot": "",
+            "boiled_egg_plot": "",
             "source": "swissadme",
         }
         try:
@@ -482,7 +483,7 @@ class SwissADMEAdapter:
                                     "Ghose": json_object["Ghose #violations"],
                                     "Veber": json_object["Veber #violations"],
                                     "Egan": json_object["Egan #violations"],
-                                    "Muegge #violations": json_object["Muegge #violations"],
+                                    "Muegge": json_object["Muegge #violations"],
                                     "Bioavailability Score": json_object["Bioavailability Score"],
                                 }
 
@@ -554,3 +555,12 @@ class SwissADMEAdapter:
         finally:
             if driver:
                 driver.quit()
+    
+# async def main():
+#     adapter = SwissADMEAdapter()
+#     result = await adapter.search_drug_properties(["CCO", "CC"])
+#     print(result)
+ 
+# if __name__ == "__main__":
+#     import asyncio
+#     asyncio.run(main())
