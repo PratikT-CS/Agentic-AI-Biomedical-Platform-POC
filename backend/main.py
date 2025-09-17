@@ -74,7 +74,8 @@ async def process_query(query_data: dict):
     {
         "query": "string",
         "sources": ["pubmed", "uniprot", "swissadme"],
-        "max_results": 10
+        "max_results": 10,
+        "processingMode": "ai" or "direct"
     }
     """
     try:
@@ -87,12 +88,14 @@ async def process_query(query_data: dict):
         # Set defaults
         sources = query_data.get("sources", ["pubmed", "uniprot", "swissadme"])
         max_results = query_data.get("max_results", 10)
+        processing_mode = query_data.get("processingMode", "ai")
         
-        # Process query through AI agent
+        # Process query through workflow service
         result = await workflow_service.process_query(
             query=query_data["query"],
             sources=sources,
-            max_results=max_results
+            max_results=max_results,
+            processing_mode=processing_mode
         )
         
         return JSONResponse(content=result)

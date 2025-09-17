@@ -297,7 +297,9 @@ function App() {
                 {status === "idle" &&
                   "Ready to process your biomedical research query"}
                 {status === "loading" &&
-                  "Processing your query with AI orchestration..."}
+                  (queryData.processingMode === "ai"
+                    ? "Processing your query with AI orchestration..."
+                    : "Processing your query with direct data retrieval...")}
                 {status === "success" && "Query completed successfully!"}
                 {status === "error" && `Error: ${error}`}
               </StatusText>
@@ -412,10 +414,14 @@ function App() {
                     }}
                   />
                   <div style={{ fontWeight: "500", marginBottom: "10px" }}>
-                    AI Agent Working
+                    {queryData.processingMode === "ai"
+                      ? "AI Agent Working"
+                      : "Direct Processing"}
                   </div>
                   <div style={{ fontSize: "0.9rem", opacity: 0.8 }}>
-                    Orchestrating searches across biomedical databases...
+                    {queryData.processingMode === "ai"
+                      ? "Orchestrating searches across biomedical databases..."
+                      : "Retrieving data from selected sources..."}
                   </div>
                 </div>
               </div>
