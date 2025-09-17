@@ -1,6 +1,13 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Search, CheckSquare, Square, Settings } from "lucide-react";
+import {
+  Search,
+  CheckSquare,
+  Square,
+  Settings,
+  Brain,
+  Zap,
+} from "lucide-react";
 
 const FormContainer = styled.div`
   background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
@@ -236,11 +243,48 @@ const ExampleItem = styled.li`
   }
 `;
 
+const FormTitleContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+`;
+
+const CompactToggleContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8f9fa;
+  padding: 6px 10px;
+  border-radius: 20px;
+  border: 1px solid #e9ecef;
+`;
+
+const CompactToggleOption = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 8px;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: ${(props) => (props.active ? "#4facfe" : "transparent")};
+  color: ${(props) => (props.active ? "white" : "#6c757d")};
+  font-size: 0.8rem;
+  font-weight: ${(props) => (props.active ? "600" : "500")};
+
+  &:hover {
+    background: ${(props) => (props.active ? "#4facfe" : "#e3f2fd")};
+    color: ${(props) => (props.active ? "white" : "#4facfe")};
+  }
+`;
+
 function QueryForm({ onSubmit, availableSources, loading }) {
   const [formData, setFormData] = useState({
     query: "",
     sources: ["pubmed", "uniprot", "swissadme"],
     maxResults: 10,
+    processingMode: "ai", // "ai" or "direct"
   });
 
   const exampleQueries = [
@@ -281,12 +325,37 @@ function QueryForm({ onSubmit, availableSources, loading }) {
     }));
   };
 
+  const handleProcessingModeChange = (mode) => {
+    setFormData((prev) => ({
+      ...prev,
+      processingMode: mode,
+    }));
+  };
+
   return (
     <FormContainer>
-      <FormTitle>
-        <Search size={20} />
-        Research Query
-      </FormTitle>
+      <FormTitleContainer>
+        <FormTitle>
+          <Search size={20} />
+          Research Query
+        </FormTitle>
+        <CompactToggleContainer>
+          <CompactToggleOption
+            active={formData.processingMode === "ai"}
+            onClick={() => handleProcessingModeChange("ai")}
+          >
+            <Brain size={14} />
+            AI
+          </CompactToggleOption>
+          <CompactToggleOption
+            active={formData.processingMode === "direct"}
+            onClick={() => handleProcessingModeChange("direct")}
+          >
+            <Zap size={14} />
+            Direct
+          </CompactToggleOption>
+        </CompactToggleContainer>
+      </FormTitleContainer>
 
       <Form onSubmit={handleSubmit}>
         <InputGroup>

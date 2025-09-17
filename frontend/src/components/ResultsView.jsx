@@ -9,6 +9,11 @@ import {
   ExternalLink,
   ChevronDown,
   ChevronRight,
+  Image,
+  Eye,
+  Activity,
+  Plus,
+  Minus,
 } from "lucide-react";
 import JsonView from "@uiw/react-json-view";
 
@@ -390,6 +395,199 @@ const SwissADMESmilesValue = styled.div`
   word-break: break-all;
 `;
 
+const SwissADMEMoleculeCard = styled.div`
+  padding: 0;
+  margin: 0;
+`;
+
+const SwissADMEMoleculeHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #e9ecef;
+`;
+
+const SwissADMEMoleculeTitle = styled.h5`
+  margin: 0;
+  color: #2c3e50;
+  font-size: 1.1rem;
+  font-weight: 600;
+`;
+
+const SwissADMEMoleculeSmiles = styled.div`
+  font-family: "Courier New", monospace;
+  background: #f8f9fa;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #495057;
+  border: 1px solid #dee2e6;
+`;
+
+// Simple molecule container design with inline expansion
+const SimpleMoleculeCard = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+  }
+`;
+
+const MoleculeHeader = styled.div`
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+`;
+
+const MoleculeInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+`;
+
+const MoleculeTitle = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 2px;
+`;
+
+const MoleculeSmiles = styled.div`
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  color: #6c757d;
+  word-break: break-all;
+`;
+
+const PlusButton = styled.button`
+  background: none;
+  border: none;
+  color: #6c757d;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    background: #dee2e6;
+    color: #495057;
+  }
+`;
+
+const MoleculeContent = styled.div`
+  background: white;
+  border-top: 1px solid #dee2e6;
+  padding: 16px;
+  max-height: ${(props) => (props.expanded ? "none" : "0")};
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+`;
+
+const ImageContainer = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const ImageWrapper = styled.div`
+  background: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 6px;
+  padding: 12px;
+  text-align: center;
+`;
+
+const ImageTitle = styled.div`
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 8px;
+`;
+
+const ImageDisplay = styled.img`
+  width: 100%;
+  height: 200px;
+  object-fit: contain;
+  border-radius: 4px;
+  background: white;
+`;
+
+const SwissADMEImageContainer = styled.div`
+  display: flex;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+`;
+
+const SwissADMEImageCard = styled.div`
+  flex: 1;
+  min-width: 200px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 15px;
+  text-align: center;
+  border: 1px solid #dee2e6;
+`;
+
+const SwissADMEImageTitle = styled.div`
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 10px;
+`;
+
+const SwissADMEImage = styled.img`
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+`;
+
+const SwissADMEBoiledEggSection = styled.div`
+  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+  border-radius: 12px;
+  padding: 20px;
+  border: 1px solid #ffc107;
+  margin-bottom: 20px;
+  text-align: center;
+`;
+
+const SwissADMEBoiledEggTitle = styled.h4`
+  margin: 0 0 15px 0;
+  color: #856404;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`;
+
+const SwissADMEBoiledEggImage = styled.img`
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+`;
+
 function ResultsView({ results, status }) {
   const [expandedSources, setExpandedSources] = useState({});
 
@@ -437,139 +635,452 @@ function ResultsView({ results, status }) {
   };
 
   const renderSwissADMEResults = (item) => {
+    const smiles = item.smiles || [];
+    const molecules = smiles.length > 0 ? smiles : ["Unknown"];
+
     return (
       <SwissADMEContainer>
-        {/* SMILES Display */}
-        {item.smiles && (
-          <SwissADMESmilesCard>
-            <SwissADMESmilesTitle>SMILES Structure</SwissADMESmilesTitle>
-            <SwissADMESmilesValue>{item.smiles}</SwissADMESmilesValue>
-          </SwissADMESmilesCard>
+        {/* Boiled Egg Plot - Single for all molecules */}
+        {item.boiled_egg_plot && (
+          <SwissADMEBoiledEggSection>
+            <SwissADMEBoiledEggTitle>
+              <Activity size={16} />
+              Boiled Egg Plot (ADME Properties)
+            </SwissADMEBoiledEggTitle>
+            <SwissADMEBoiledEggImage
+              src={item.boiled_egg_plot}
+              alt="Boiled Egg Plot showing ADME properties"
+            />
+          </SwissADMEBoiledEggSection>
         )}
 
-        {/* Physicochemical Properties */}
-        {item.physicochemical_properties && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Pill size={16} />
-              Physicochemical Properties
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.physicochemical_properties).map(
-                ([key, value]) => (
-                  <SwissADMEPropertyCard key={key}>
-                    <SwissADMEPropertyName>
-                      {key.replace(/_/g, " ").toUpperCase()}
-                    </SwissADMEPropertyName>
-                    <SwissADMEPropertyValue>
-                      {formatPropertyValue(value)}
-                    </SwissADMEPropertyValue>
-                  </SwissADMEPropertyCard>
-                )
+        {/* Individual Molecule Cards with Inline Expansion */}
+        {molecules.map((smile, index) => (
+          <SimpleMoleculeCard key={index}>
+            <MoleculeHeader
+              onClick={() => toggleSource(`swissadme-molecule-${index}`)}
+            >
+              <MoleculeInfo>
+                <MoleculeTitle>Molecule {index + 1}</MoleculeTitle>
+                <MoleculeSmiles>{smile}</MoleculeSmiles>
+              </MoleculeInfo>
+              <PlusButton>
+                {expandedSources[`swissadme-molecule-${index}`] ? (
+                  <Minus size={16} />
+                ) : (
+                  <Plus size={16} />
+                )}
+              </PlusButton>
+            </MoleculeHeader>
+
+            <MoleculeContent
+              expanded={expandedSources[`swissadme-molecule-${index}`]}
+            >
+              {/* Molecular Structure Images */}
+              {item.images && item.images[smile] && (
+                <ImageContainer>
+                  {item.images[smile].mol_structure_img_src && (
+                    <ImageWrapper>
+                      <ImageTitle>Molecular Structure</ImageTitle>
+                      <ImageDisplay
+                        src={item.images[smile].mol_structure_img_src}
+                        alt={`Molecular structure for ${smile}`}
+                      />
+                    </ImageWrapper>
+                  )}
+                  {item.images[smile].radar_image && (
+                    <ImageWrapper>
+                      <ImageTitle>Radar Plot</ImageTitle>
+                      <ImageDisplay
+                        src={`https://images.weserv.nl/?url=${item.images[smile].radar_image}`}
+                        alt={`Radar plot for ${smile}`}
+                      />
+                    </ImageWrapper>
+                  )}
+                </ImageContainer>
               )}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
 
-        {/* Lipophilicity */}
-        {item.lipophilicity && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Pill size={16} />
-              Lipophilicity
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.lipophilicity).map(([key, value]) => (
-                <SwissADMEPropertyCard key={key}>
-                  <SwissADMEPropertyName>{key}</SwissADMEPropertyName>
-                  <SwissADMEPropertyValue>
-                    {formatPropertyValue(value)}
-                  </SwissADMEPropertyValue>
-                </SwissADMEPropertyCard>
-              ))}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
+              {/* Physicochemical Properties */}
+              {item.physicochemical_properties &&
+                item.physicochemical_properties[smile] && (
+                  <div style={{ marginBottom: "25px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "15px",
+                        color: "#2c3e50",
+                        fontSize: "1.1rem",
+                        fontWeight: "600",
+                      }}
+                    >
+                      <Pill size={16} />
+                      Physicochemical Properties
+                    </div>
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns:
+                          "repeat(auto-fit, minmax(200px, 1fr))",
+                        gap: "10px",
+                      }}
+                    >
+                      {Object.entries(
+                        item.physicochemical_properties[smile]
+                      ).map(([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key.replace(/_/g, " ")}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
-        {/* Water Solubility */}
-        {item.water_solubility && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Pill size={16} />
-              Water Solubility
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.water_solubility).map(([key, value]) => (
-                <SwissADMEPropertyCard key={key}>
-                  <SwissADMEPropertyName>{key}</SwissADMEPropertyName>
-                  <SwissADMEPropertyValue>
-                    {formatPropertyValue(value)}
-                  </SwissADMEPropertyValue>
-                </SwissADMEPropertyCard>
-              ))}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
+              {/* Lipophilicity */}
+              {item.lipophilicity && item.lipophilicity[smile] && (
+                <div style={{ marginBottom: "25px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "15px",
+                      color: "#2c3e50",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <Pill size={16} />
+                    Lipophilicity
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    {Object.entries(item.lipophilicity[smile]).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
-        {/* Pharmacokinetics */}
-        {item.pharmacokinetics && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Brain size={16} />
-              Pharmacokinetics
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.pharmacokinetics).map(([key, value]) => (
-                <SwissADMEPropertyCard key={key}>
-                  <SwissADMEPropertyName>{key}</SwissADMEPropertyName>
-                  <SwissADMEPropertyValue>
-                    {formatPropertyValue(value)}
-                  </SwissADMEPropertyValue>
-                </SwissADMEPropertyCard>
-              ))}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
+              {/* Water Solubility */}
+              {item.water_solubility && item.water_solubility[smile] && (
+                <div style={{ marginBottom: "25px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "15px",
+                      color: "#2c3e50",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <Pill size={16} />
+                    Water Solubility
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    {Object.entries(item.water_solubility[smile]).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
-        {/* Drug Likeness */}
-        {item.druglikeness && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Pill size={16} />
-              Drug Likeness
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.druglikeness).map(([key, value]) => (
-                <SwissADMEPropertyCard key={key}>
-                  <SwissADMEPropertyName>{key}</SwissADMEPropertyName>
-                  <SwissADMEPropertyValue>
-                    {formatPropertyValue(value)}
-                  </SwissADMEPropertyValue>
-                </SwissADMEPropertyCard>
-              ))}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
+              {/* Pharmacokinetics */}
+              {item.pharmacokinetics && item.pharmacokinetics[smile] && (
+                <div style={{ marginBottom: "25px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "15px",
+                      color: "#2c3e50",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <Brain size={16} />
+                    Pharmacokinetics
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    {Object.entries(item.pharmacokinetics[smile]).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
 
-        {/* Medicinal Chemistry */}
-        {item.medicinal_chemistry && (
-          <SwissADMESection>
-            <SwissADMESectionTitle>
-              <Dna size={16} />
-              Medicinal Chemistry
-            </SwissADMESectionTitle>
-            <SwissADMEGrid>
-              {Object.entries(item.medicinal_chemistry).map(([key, value]) => (
-                <SwissADMEPropertyCard key={key}>
-                  <SwissADMEPropertyName>{key}</SwissADMEPropertyName>
-                  <SwissADMEPropertyValue>
-                    {formatPropertyValue(value)}
-                  </SwissADMEPropertyValue>
-                </SwissADMEPropertyCard>
-              ))}
-            </SwissADMEGrid>
-          </SwissADMESection>
-        )}
+              {/* Drug Likeness */}
+              {item.druglikeness && item.druglikeness[smile] && (
+                <div style={{ marginBottom: "25px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "15px",
+                      color: "#2c3e50",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <Pill size={16} />
+                    Drug Likeness
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    {Object.entries(item.druglikeness[smile]).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Medicinal Chemistry */}
+              {item.medicinal_chemistry && item.medicinal_chemistry[smile] && (
+                <div style={{ marginBottom: "25px" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "8px",
+                      marginBottom: "15px",
+                      color: "#2c3e50",
+                      fontSize: "1.1rem",
+                      fontWeight: "600",
+                    }}
+                  >
+                    <Dna size={16} />
+                    Medicinal Chemistry
+                  </div>
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns:
+                        "repeat(auto-fit, minmax(200px, 1fr))",
+                      gap: "10px",
+                    }}
+                  >
+                    {Object.entries(item.medicinal_chemistry[smile]).map(
+                      ([key, value]) => (
+                        <div
+                          key={key}
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            padding: "8px 12px",
+                            backgroundColor: "#f8f9fa",
+                            borderRadius: "6px",
+                            border: "1px solid #e9ecef",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "0.85rem",
+                              color: "#6c757d",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {key}
+                          </span>
+                          <span
+                            style={{
+                              fontSize: "0.9rem",
+                              color: "#2c3e50",
+                              fontWeight: "600",
+                            }}
+                          >
+                            {formatPropertyValue(value)}
+                          </span>
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+              )}
+            </MoleculeContent>
+          </SimpleMoleculeCard>
+        ))}
       </SwissADMEContainer>
     );
   };

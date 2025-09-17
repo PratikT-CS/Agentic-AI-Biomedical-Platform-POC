@@ -34,7 +34,7 @@ class WorkflowService:
             logger.error(f"Error initializing workflow service: {e}")
             self.initialized = False
     
-    async def process_query(self, query: str, sources: List[str], max_results: int = 10) -> Dict:
+    async def process_query(self, query: str, sources: List[str], max_results: int = 10, processing_mode: str = "ai") -> Dict:
         """
         Process a biomedical research query
         
@@ -42,6 +42,7 @@ class WorkflowService:
             query: The research query
             sources: List of data sources to query
             max_results: Maximum results per source
+            processing_mode: Processing mode - "ai" for AI orchestration, "direct" for direct processing
             
         Returns:
             Dictionary containing processed results
@@ -55,12 +56,12 @@ class WorkflowService:
             # Log the query
             query_log_id = await self._log_query(query, sources, start_time)
             
-            # Process using AI orchestration if available
-            if self.initialized:
+            # Process based on user's choice and availability
+            if processing_mode == "ai" and self.initialized:
                 result = await self.ai_orchestrator.process_query(query, sources, max_results)
                 orchestration_method = "ai_orchestration"
             else:
-                # Fallback to direct processing
+                # Use direct processing (either user choice or fallback)
                 result = await self._direct_processing(query, sources, max_results)
                 orchestration_method = "direct_processing"
             

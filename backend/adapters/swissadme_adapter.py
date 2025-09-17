@@ -1,278 +1,3 @@
-# """
-# SwissADME web scraping adapter for drug property predictions
-# """
-
-# import requests
-# from bs4 import BeautifulSoup
-# from selenium import webdriver
-# from selenium.webdriver.common.by import By
-# from selenium.webdriver.support.ui import WebDriverWait
-# from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.chrome.options import Options
-# from selenium.common.exceptions import TimeoutException, WebDriverException
-# from typing import List, Dict, Optional
-# from loguru import logger
-# import time
-# import re
-# from datetime import datetime
-
-# class SwissADMEAdapter:
-#     """Adapter for SwissADME web scraping"""
-    
-#     def __init__(self):
-#         self.base_url = "http://www.swissadme.ch/"
-#         self.search_url = f"{self.base_url}index.php"
-#         self.driver = None
-#         self.setup_driver()
-        
-#     def setup_driver(self):
-#         """Setup Chrome driver with headless options"""
-#         try:
-#             chrome_options = Options()
-#             chrome_options.add_argument("--headless")
-#             chrome_options.add_argument("--no-sandbox")
-#             chrome_options.add_argument("--disable-dev-shm-usage")
-#             chrome_options.add_argument("--disable-gpu")
-#             chrome_options.add_argument("--window-size=1920,1080")
-#             chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36")
-            
-#             self.driver = webdriver.Chrome(options=chrome_options)
-#             self.driver.set_page_load_timeout(30)
-#             logger.info("Chrome driver initialized successfully")
-            
-#         except Exception as e:
-#             logger.error(f"Failed to initialize Chrome driver: {e}")
-#             self.driver = None
-    
-#     async def search_drug_properties(self, smiles: str, max_results: int = 10) -> List[Dict]:
-#         """
-#         Search for drug properties using SMILES notation
-        
-#         Args:
-#             smiles: SMILES notation of the drug molecule
-#             max_results: Maximum number of results to return (not applicable for single molecule)
-            
-#         Returns:
-#             List containing drug property dictionary
-#         """
-#         try:
-#             if not self.driver:
-#                 raise Exception("Web driver not initialized")
-            
-#             logger.info(f"Searching SwissADME for SMILES: {smiles[:50]}...")
-            
-#             # Navigate to SwissADME
-#             self.driver.get(self.search_url)
-            
-#             # Wait for page to load
-#             wait = WebDriverWait(self.driver, 10)
-            
-#             # Find and fill the SMILES input field
-#             smiles_input = wait.until(
-#                 EC.presence_of_element_located((By.NAME, "smiles"))
-#             )
-#             smiles_input.clear()
-#             # smiles_input.send_keys(smiles)
-#             smiles_input.send_keys("c1ccccc1Oc1ccccc1")
-            
-#             # Submit the form using the correct button selector
-#             submit_button = wait.until(
-#                 EC.element_to_be_clickable((By.ID, "submitButton"))
-#             )
-#             submit_button.click()
-            
-#             # Wait for results to load
-#             time.sleep(60)
-            
-#             # Parse the results
-#             drug_properties = self._parse_results_page()
-            
-#             logger.info(f"Retrieved drug properties from SwissADME")
-#             return [drug_properties] if drug_properties else []
-            
-#         except TimeoutException:
-#             logger.error("Timeout while waiting for SwissADME page to load")
-#             raise Exception("SwissADME request timeout")
-#         except WebDriverException as e:
-#             logger.error(f"WebDriver error: {e}")
-#             raise Exception(f"SwissADME web scraping error: {e}")
-#         except Exception as e:
-#             logger.error(f"Error searching SwissADME: {e}")
-#             raise
-    
-#     def _parse_results_page(self) -> Optional[Dict]:
-#         """Parse the SwissADME results page"""
-#         try:
-#             # Get page source
-#             page_source = self.driver.page_source
-#             soup = BeautifulSoup(page_source, 'html.parser')
-            
-#             # Initialize result dictionary
-#             drug_properties = {
-#                 "smiles": "",
-#                 "molecular_properties": {},
-#                 "adme_properties": {},
-#                 "drug_likeness": {},
-#                 "medicinal_chemistry": {},
-#                 "source": "swissadme",
-#                 "retrieved_at": datetime.utcnow().isoformat()
-#             }
-            
-#             # Extract molecular properties
-#             drug_properties["molecular_properties"] = self._extract_molecular_properties(soup)
-            
-#             # Extract ADME properties
-#             drug_properties["adme_properties"] = self._extract_adme_properties(soup)
-            
-#             # Extract drug likeness
-#             drug_properties["drug_likeness"] = self._extract_drug_likeness(soup)
-            
-#             # Extract medicinal chemistry properties
-#             drug_properties["medicinal_chemistry"] = self._extract_medicinal_chemistry(soup)
-            
-#             return drug_properties
-            
-#         except Exception as e:
-#             logger.error(f"Error parsing SwissADME results: {e}")
-#             return None
-    
-#     def _extract_molecular_properties(self, soup: BeautifulSoup) -> Dict:
-#         """Extract molecular properties from the results page"""
-#         properties = {}
-        
-#         try:
-#             # Look for molecular properties table
-#             tables = soup.find_all('table')
-#             for table in tables:
-#                 rows = table.find_all('tr')
-#                 for row in rows:
-#                     cells = row.find_all(['td', 'th'])
-#                     if len(cells) >= 2:
-#                         key = cells[0].get_text(strip=True)
-#                         value = cells[1].get_text(strip=True)
-#                         if key and value:
-#                             properties[key] = value
-#         except Exception as e:
-#             logger.error(f"Error extracting molecular properties: {e}")
-        
-#         return properties
-    
-#     def _extract_adme_properties(self, soup: BeautifulSoup) -> Dict:
-#         """Extract ADME properties from the results page"""
-#         properties = {}
-        
-#         try:
-#             # Look for ADME-related content
-#             # This is a simplified extraction - in practice, you'd need to identify
-#             # the specific sections and tables containing ADME data
-#             adme_sections = soup.find_all(text=re.compile(r'ADME|Absorption|Distribution|Metabolism|Excretion', re.I))
-            
-#             for section in adme_sections:
-#                 parent = section.parent
-#                 if parent:
-#                     # Extract nearby data
-#                     tables = parent.find_next_siblings('table')
-#                     for table in tables:
-#                         rows = table.find_all('tr')
-#                         for row in rows:
-#                             cells = row.find_all(['td', 'th'])
-#                             if len(cells) >= 2:
-#                                 key = cells[0].get_text(strip=True)
-#                                 value = cells[1].get_text(strip=True)
-#                                 if key and value:
-#                                     properties[key] = value
-#         except Exception as e:
-#             logger.error(f"Error extracting ADME properties: {e}")
-        
-#         return properties
-    
-#     def _extract_drug_likeness(self, soup: BeautifulSoup) -> Dict:
-#         """Extract drug likeness properties"""
-#         properties = {}
-        
-#         try:
-#             # Look for drug likeness indicators
-#             drug_likeness_indicators = [
-#                 'Lipinski', 'Veber', 'Egan', 'Muegge', 'Bioavailability Score'
-#             ]
-            
-#             for indicator in drug_likeness_indicators:
-#                 elements = soup.find_all(text=re.compile(indicator, re.I))
-#                 for element in elements:
-#                     parent = element.parent
-#                     if parent:
-#                         # Extract the value or status
-#                         value_element = parent.find_next_sibling()
-#                         if value_element:
-#                             properties[indicator] = value_element.get_text(strip=True)
-#         except Exception as e:
-#             logger.error(f"Error extracting drug likeness: {e}")
-        
-#         return properties
-    
-#     def _extract_medicinal_chemistry(self, soup: BeautifulSoup) -> Dict:
-#         """Extract medicinal chemistry properties"""
-#         properties = {}
-        
-#         try:
-#             # Look for medicinal chemistry related content
-#             medchem_terms = [
-#                 'PAINS', 'Brenk', 'Lead-likeness', 'Synthetic accessibility'
-#             ]
-            
-#             for term in medchem_terms:
-#                 elements = soup.find_all(text=re.compile(term, re.I))
-#                 for element in elements:
-#                     parent = element.parent
-#                     if parent:
-#                         value_element = parent.find_next_sibling()
-#                         if value_element:
-#                             properties[term] = value_element.get_text(strip=True)
-#         except Exception as e:
-#             logger.error(f"Error extracting medicinal chemistry properties: {e}")
-        
-#         return properties
-    
-#     async def search_by_drug_name(self, drug_name: str) -> List[Dict]:
-#         """
-#         Search for drug properties by drug name (requires SMILES conversion)
-#         Note: This is a simplified implementation. In practice, you'd need
-#         to convert drug names to SMILES first using another service.
-#         """
-#         try:
-#             # For demonstration, we'll use a placeholder SMILES
-#             # In a real implementation, you'd use a chemical name to SMILES converter
-#             placeholder_smiles = "c1ccccc1Oc1ccccc1"  # Ethanol as placeholder
-            
-#             logger.warning(f"Drug name search not fully implemented. Using placeholder SMILES for: {drug_name}")
-#             return await self.search_drug_properties(placeholder_smiles)
-            
-#         except Exception as e:
-#             logger.error(f"Error searching by drug name: {e}")
-#             raise
-    
-#     def cleanup(self):
-#         """Clean up the web driver"""
-#         if self.driver:
-#             try:
-#                 self.driver.quit()
-#                 logger.info("Web driver cleaned up")
-#             except Exception as e:
-#                 logger.error(f"Error cleaning up web driver: {e}")
-    
-#     def get_source_info(self) -> Dict:
-#         """Get information about the SwissADME data source"""
-#         return {
-#             "name": "SwissADME",
-#             "description": "SwissADME is a free web tool to evaluate pharmacokinetics, drug-likeness and medicinal chemistry friendliness of small molecules",
-#             "url": "http://www.swissadme.ch/",
-#             "api_documentation": "Not available - web scraping required",
-#             "data_types": ["drug_properties", "adme_predictions", "drug_likeness", "medicinal_chemistry"],
-#             "access_method": "web_scraping",
-#             "rate_limits": "No official limits, but reasonable usage expected",
-#             "requirements": "SMILES notation input required"
-#         }
-
 """
 SwissADME web scraping adapter for drug property predictions
 """
@@ -343,8 +68,13 @@ class SwissADMEAdapter:
                 raise Exception("Web driver not initialized")
            
             logger.info(f"Searching SwissADME for SMILES: {smiles[:50]}...")
-           
-            drug_properties = await self.scrape_swissadme(smiles=smiles, headless=False, timeout=80, download_csv=True, extract_images=True, output_dir="test")
+
+            print(smiles)
+            smiles = smiles.replace(" ", "")
+            print(smiles)
+            smiles_array = smiles.split(",")
+            print(smiles_array)
+            drug_properties = await self.scrape_swissadme(smiles=smiles_array, headless=False, timeout=80, download_csv=True, extract_images=True, output_dir="test")
  
             if drug_properties["success"] == True:
                 del drug_properties["success"]
@@ -506,7 +236,7 @@ class SwissADMEAdapter:
             # For demonstration, we'll use a placeholder SMILES
             # In a real implementation, you'd use a chemical name to SMILES converter
             placeholder_smiles = "CCO"  # Ethanol as placeholder
-           
+            print(drug_name)
             logger.warning(f"Drug name search not fully implemented. Using placeholder SMILES for: {drug_name}")
             return await self.search_drug_properties(drug_name.split(","))
            
@@ -752,7 +482,7 @@ class SwissADMEAdapter:
                                     "Ghose": json_object["Ghose #violations"],
                                     "Veber": json_object["Veber #violations"],
                                     "Egan": json_object["Egan #violations"],
-                                    "Muegge #violations": json_object["Muegge #violations"],
+                                    "Muegge": json_object["Muegge #violations"],
                                     "Bioavailability Score": json_object["Bioavailability Score"],
                                 }
 
