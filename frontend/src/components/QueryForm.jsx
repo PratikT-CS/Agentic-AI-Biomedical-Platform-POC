@@ -377,14 +377,14 @@ function QueryForm({ onSubmit, availableSources, loading }) {
               onClick={() => handleProcessingModeChange("ai")}
             >
               <Brain size={12} />
-              AI-Powered Synthesis
+              AI
             </CompactToggleOption>
             <CompactToggleOption
               active={formData.processingMode === "direct"}
               onClick={() => handleProcessingModeChange("direct")}
             >
               <Zap size={12} />
-              Direct Search
+              Direct
             </CompactToggleOption>
           </CompactToggleContainer>
         </FormTitleContainer>
@@ -427,7 +427,9 @@ function QueryForm({ onSubmit, availableSources, loading }) {
                       {source.name.toUpperCase()}
                     </SourceCheckbox>
                   </SourceHeader>
-                  <SourceType type={source.type}>{source.type.toUpperCase()}</SourceType>
+                  <SourceType type={source.type}>
+                    {source.type.toUpperCase()}
+                  </SourceType>
                   <SourceDescription>{source.description}</SourceDescription>
                 </SourceCard>
               ))}

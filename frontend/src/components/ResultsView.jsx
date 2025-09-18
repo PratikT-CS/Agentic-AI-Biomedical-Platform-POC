@@ -626,9 +626,79 @@ function ResultsView({ results, status }) {
     }
   };
 
-  const formatPropertyValue = (value) => {
+  const formatPropertyValue = (key, value) => {
     if (typeof value === "number") {
-      return value.toFixed(3);
+      // Add units based on property type
+      const unitMap = {
+        // Molecular weight
+        molecular_weight: "g/mol",
+        mw: "g/mol",
+        "molecular weight": "g/mol",
+
+        // Molar refractivity
+        molar_refractivity: "",
+        mr: "",
+        "molar refractivity": "",
+
+        // TPSA (Topological Polar Surface Area)
+        tpsa: "Å²",
+        topological_polar_surface_area: "Å²",
+        "topological polar surface area": "Å²",
+
+        // Log P values (lipophilicity)
+        "log_po/w_(ilogp)": "",
+        "log_po/w_(xlogp3)": "",
+        "log_po/w_(wlogp)": "",
+        "log_po/w_(mlogp)": "",
+        "log_po/w_(silicos-it)": "",
+        ilogp: "",
+        xlogp3: "",
+        wlogp: "",
+        mlogp: "",
+        "silicos-it": "",
+
+        // Solubility
+        "log_s_(esol)": "mg/ml",
+        "log_s_(ali)": "mg/ml",
+        "log_s_(silicos-it)": "mg/ml",
+        esol: "mg/ml",
+        ali: "mg/ml",
+
+        // Skin permeation
+        "log_kp_(skin_permeation)": "cm/s",
+        "log kp (skin permeation)": "cm/s",
+        log_kp: "cm/s",
+        skin_permeation: "cm/s",
+        "skin permeation": "cm/s",
+
+        // Counts (no units needed)
+        num_heavy_atoms: "",
+        num_arom_heavy_atoms: "",
+        num_rotatable_bonds: "",
+        "num_h-bond_acceptors": "",
+        "num_h-bond_donors": "",
+        heavy_atoms: "",
+        arom_heavy_atoms: "",
+        rotatable_bonds: "",
+        "h-bond_acceptors": "",
+        "h-bond_donors": "",
+
+        // Fractions (no units needed)
+        fraction_csp3: "",
+        csp3: "",
+      };
+
+      const unit = unitMap[key.toLowerCase()] || "";
+
+      // Check if the value is very small (scientific notation territory)
+      // If absolute value is less than 0.001, use scientific notation
+      if (Math.abs(value) < 0.001 && value !== 0) {
+        const formattedValue = value.toExponential(2);
+        return `${formattedValue}${unit ? ` ${unit}` : ""}`;
+      }
+
+      // For normal values, use fixed decimal places
+      return `${value.toFixed(3)}${unit ? ` ${unit}` : ""}`;
     }
     if (typeof value === "boolean") {
       return value ? "Yes" : "No";
@@ -735,11 +805,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -747,6 +818,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key.replace(/_/g, " ")}
@@ -756,9 +829,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       ))}
@@ -797,11 +873,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -809,6 +886,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key}
@@ -818,9 +897,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       )
@@ -860,11 +942,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -872,6 +955,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key}
@@ -881,9 +966,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       )
@@ -923,11 +1011,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -935,6 +1024,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key}
@@ -944,9 +1035,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       )
@@ -986,11 +1080,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -998,6 +1093,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key}
@@ -1007,9 +1104,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       )
@@ -1049,11 +1149,12 @@ function ResultsView({ results, status }) {
                           key={key}
                           style={{
                             display: "flex",
-                            justifyContent: "space-between",
+                            flexDirection: "column",
                             padding: "8px 12px",
                             backgroundColor: "#f8f9fa",
                             borderRadius: "6px",
                             border: "1px solid #e9ecef",
+                            gap: "4px",
                           }}
                         >
                           <span
@@ -1061,6 +1162,8 @@ function ResultsView({ results, status }) {
                               fontSize: "0.85rem",
                               color: "#6c757d",
                               fontWeight: "500",
+                              lineHeight: "1.3",
+                              wordBreak: "break-word",
                             }}
                           >
                             {key}
@@ -1070,9 +1173,12 @@ function ResultsView({ results, status }) {
                               fontSize: "0.9rem",
                               color: "#2c3e50",
                               fontWeight: "600",
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
                             }}
                           >
-                            {formatPropertyValue(value)}
+                            {formatPropertyValue(key, value)}
                           </span>
                         </div>
                       )
