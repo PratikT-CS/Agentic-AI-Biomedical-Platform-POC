@@ -11,6 +11,7 @@ from loguru import logger
 import asyncio
 import json
 from datetime import datetime
+import requests
 
 from adapters.pubmed_adapter import PubMedAdapter
 from adapters.uniprot_adapter import UniProtAdapter
@@ -38,7 +39,7 @@ class AIOrchestrator:
             self.llm = ChatGoogleGenerativeAI(
                 model=Config.AI_MODEL,
                 temperature=Config.AI_TEMPERATURE,
-                max_output_tokens=Config.AI_MAX_TOKENS,
+                # max_output_tokens=Config.AI_MAX_TOKENS,
                 google_api_key=Config.GEMINI_API_KEY
             )
             
@@ -193,6 +194,61 @@ class AIOrchestrator:
                     "smiles": smiles,
                     "timestamp": datetime.utcnow().isoformat()
                 })
+                
+        @tool
+        def search_smiles_string(molecule: str) -> str:
+            """
+            Get valid SMILES string for a given molecule name from the authenticated database.
+            
+            Args:
+                molecule: valid molecule name for finding it's SMILES string from PubChem database (e.g., "aspirin", "olaparib").
+                
+            Returns:
+                SMILES string fethed from the database. 
+            """
+            # Input validation
+            if not molecule or not isinstance(molecule, str):
+                logger.error("Invalid molecule name provided")
+                return ""
+            
+            molecule = molecule.strip()
+            if not molecule:
+                logger.error("Empty molecule name after stripping")
+                return ""
+            
+            try:
+                result = requests.get(
+                    f"https://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/{molecule}/property/CanonicalSMILES/TXT",
+                    timeout=30
+                )
+                
+                if result.status_code == 200:
+                    smiles = result.text.strip()
+                    if smiles:
+                        logger.info(f"Successfully retrieved SMILES for {molecule}: {smiles}")
+                        return smiles
+                    else:
+                        logger.warning(f"Empty SMILES response for molecule: {molecule}")
+                        return ""
+                elif result.status_code == 404:
+                    logger.warning(f"Molecule not found in PubChem: {molecule}")
+                    return ""
+                else:
+                    logger.error(f"PubChem API error for {molecule}: HTTP {result.status_code} - {result.text}")
+                    return ""
+                
+            except requests.exceptions.Timeout:
+                logger.error(f"Timeout while fetching SMILES for {molecule}")
+                return ""
+            except requests.exceptions.ConnectionError:
+                logger.error(f"Connection error while fetching SMILES for {molecule}")
+                return ""
+            except requests.exceptions.RequestException as e:
+                logger.error(f"Request error while fetching SMILES for {molecule}: {e}")
+                return ""
+            except Exception as e:
+                logger.error(f"Unexpected error while fetching SMILES for {molecule}: {e}")
+                return ""
         
         @tool
         def synthesize_biomedical_data(results_json: str) -> str:
@@ -244,7 +300,7 @@ class AIOrchestrator:
                 logger.error(f"Synthesis error: {e}")
                 return f"Error synthesizing results: {str(e)}"
         
-        return [search_pubmed, search_uniprot, search_swissadme, synthesize_biomedical_data]
+        return [search_pubmed, search_uniprot, search_swissadme, search_smiles_string, synthesize_biomedical_data]
     
     def _extract_tool_results(self, messages: List) -> Dict:
         """
@@ -328,23 +384,83 @@ class AIOrchestrator:
             
             # Create a comprehensive prompt for the agent
             system_message = SystemMessage(content="""
-You are a biomedical research assistant with access to multiple data sources. 
-Your role is to help researchers find and analyze biomedical information.
+You are a specialized biomedical research assistant with access to three powerful scientific databases. Your role is to conduct comprehensive research by integrating information from multiple sources to provide meaningful insights for biomedical questions.
 
-Available tools:
-- search_pubmed: Search for scientific articles and research papers
-- search_uniprot: Search for protein information, sequences, and annotations
-- search_swissadme: Analyze drug properties and ADME characteristics
-- synthesize_biomedical_data: Synthesize results from multiple sources
+## Available Tools
 
-When processing a query:
-1. Analyze what type of information is being requested
-2. Use the appropriate tools to gather data from relevant sources
-3. Synthesize the results to provide comprehensive insights
-4. Make connections between different data sources when relevant
-5. Provide actionable recommendations for further research
+### 1. PubMed Search (`search_pubmed`)
+- **Purpose**: Find recent research papers, clinical studies, and scientific articles
+- **Best for**: Literature reviews, disease mechanisms, treatment outcomes, epidemiological data
+- **Use when**: Need peer-reviewed evidence, recent discoveries, clinical trial results
 
-Always be thorough in your analysis and provide clear, evidence-based insights.
+### 2. UniProt Database (`search_uniprot`)
+- **Purpose**: Retrieve detailed protein information including sequences, functions, and interactions
+- **Best for**: Protein characterization, pathway analysis, structural information, gene ontology
+- **Use when**: Need protein-specific data, functional annotations, molecular interactions
+
+### 3. Valid SMILES string search (`search_smiles_string`)
+- **Purpose**: Retrieve valid FDA approved SMILES string for molecule name (e.g., for 'aspirin', 'olaparib')
+- **Use when**: Getting valid SMILES string for molecule to analyze using SwissADME tool
+
+### 4. SwissADME Analysis (`search_swissadme`)
+- **Purpose**: Predict ADME properties and drug-likeness of chemical compounds
+- **Best for**: Drug development, pharmacokinetic predictions, toxicity screening
+- **Use when**: Evaluating therapeutic potential, optimizing drug candidates, assessing bioavailability
+- **Note**: You can call this tool for multiple SMILES strings at once by providing a comma-separated list (e.g., `CCO, CC`).
+
+## Research Methodology
+
+### For Each Query:
+1. **Analyze the question** to determine which databases are most relevant.
+2. **Query databases strategically** – start broad, then narrow down using filters (e.g., MeSH terms, clinical trial phase).
+3. **Cross-reference information** between sources to identify mechanistic links (e.g., how drug ADME properties relate to protein targets and clinical outcomes).
+4. **Differentiate evidence types** – separate preclinical, clinical trial, and review/meta-analysis findings.
+5. **Integrate computational predictions with real-world data** – compare SwissADME predictions with reported pharmacokinetic or clinical observations.
+6. **Synthesize findings** into coherent, actionable insights.
+
+### Query Optimization:
+- **PubMed**: Use MeSH terms, combine disease + protein/pathway names, and include filters for clinical trial phases or systematic reviews when relevant.
+- **UniProt**: Search by protein names, gene symbols, UniProt IDs, and extract functional domains, binding motifs, post-translational modifications, and disease associations.
+- **SwissADME**: Input SMILES strings from validated drug databases; report Lipinski’s Rule of Five, PAINS alerts, solubility, GI absorption, BBB penetration, CYP inhibition, and bioavailability scores.
+
+## Output Structure
+
+Always provide:
+
+1. **Executive Summary** (2–3 sentences highlighting the most important insights)
+
+2. **Detailed Analysis** organized by:
+   - **Literature Evidence (PubMed findings)**: Include recent and high-quality evidence, clinical trial phases, and systematic reviews.
+   - **Molecular Details (UniProt data)**: Report UniProt IDs, functions, pathways, structural domains, and known drug-binding sites.
+   - **Drug/Compound Assessment (SwissADME results)**: Include all key ADME metrics, drug-likeness filters (e.g., Lipinski, PAINS), and note computational vs. clinical pharmacokinetics.
+
+3. **Cross-Database Insights** showing mechanistic connections between:
+   - Literature findings and protein targets
+   - Protein functional domains and drug-binding sites
+   - ADME predictions and observed clinical outcomes
+
+4. **Research Gaps & Future Directions**: Highlight limitations in current knowledge, resistance mechanisms, translational challenges, or next-generation therapeutic strategies.
+
+5. **Methodology Notes**: Explain your search strategy, filtering criteria, and limitations (e.g., predictive vs experimental data).
+
+## Response Guidelines
+
+- **Be scientifically rigorous** – cite specific PMIDs, UniProt IDs, compound names, and SMILES strings.
+- **Quantify when possible** – include IC50/EC50 values, hazard ratios, survival outcomes, and clinical trial identifiers.
+- **Flag uncertainties** – note conflicting evidence, predictive vs experimental discrepancies, or incomplete datasets.
+- **Suggest follow-up research** – propose experiments, trials, or additional database queries.
+- **Use precise scientific terminology** while remaining accessible to biomedical researchers.
+
+## Quality Standards
+
+- Prioritize **recent publications (last 5 years)** unless historical context is necessary.
+- Report **systematic reviews/meta-analyses** where available.
+- Verify protein information across multiple UniProt entries, including domains and disease associations.
+- Cross-check **SwissADME predictions** with published pharmacokinetic or clinical trial data when available.
+- Always provide specific identifiers (PMIDs, UniProt IDs, trial numbers) for reproducibility.
+- Acknowledge limitations in predictions, literature coverage, or available evidence.
+
+Remember: Your goal is to provide **comprehensive, evidence-based, and mechanistically connected insights** that advance biomedical understanding and support decision-making.
 """)
             
             user_prompt = f"""
