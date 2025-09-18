@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Download, FileText, FileJson, FileSpreadsheet } from "lucide-react";
+import { Download, FileText, FileJson, FileSpreadsheet, FileImage } from "lucide-react";
 
 const ExportContainer = styled.div`
   position: relative;
@@ -82,6 +82,12 @@ function ExportButtonComponent({ onExport }) {
   };
 
   const exportOptions = [
+    {
+      format: "pdf",
+      label: "Export as PDF",
+      icon: <FileImage size={14} />,
+      description: "Formatted report with all details",
+    },
     {
       format: "json",
       label: "Export as JSON",

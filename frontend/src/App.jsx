@@ -6,6 +6,7 @@ import ResultsView from "./components/ResultsView";
 import ExportButton from "./components/ExportButton";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { initializeMessagingErrorHandling } from "./utils/messagingErrorHandler";
+import PDFExportService from "./utils/pdfExportService";
 import "./App.css";
 
 const AppContainer = styled.div`
@@ -246,11 +247,44 @@ function App() {
     }
   };
 
-  const handleExport = (format) => {
+  const handleExport = async (format) => {
     if (!results) return;
 
-    const dataStr = JSON.stringify(results, null, 2);
-    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    if (format === 'pdf') {
+      try {
+        const pdfService = new PDFExportService();
+        await pdfService.generatePDF(results, `biomedical-research-results-${Date.now()}.pdf`);
+      } catch (error) {
+        console.error('Error generating PDF:', error);
+        alert('Error generating PDF. Please try again.');
+      }
+      return;
+    }
+
+    // Handle other formats (JSON, CSV, TXT)
+    let dataStr;
+    let mimeType;
+    
+    switch (format) {
+      case 'json':
+        dataStr = JSON.stringify(results, null, 2);
+        mimeType = 'application/json';
+        break;
+      case 'csv':
+        // Convert results to CSV format
+        dataStr = convertResultsToCSV(results);
+        mimeType = 'text/csv';
+        break;
+      case 'txt':
+        dataStr = convertResultsToText(results);
+        mimeType = 'text/plain';
+        break;
+      default:
+        dataStr = JSON.stringify(results, null, 2);
+        mimeType = 'application/json';
+    }
+
+    const dataBlob = new Blob([dataStr], { type: mimeType });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement("a");
     link.href = url;
@@ -259,6 +293,121 @@ function App() {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  // Convert results to CSV format
+  const convertResultsToCSV = (results) => {
+    const sourcesData = results.results || {};
+    let csvContent = 'Source,Type,Title,Details\n';
+    
+    Object.entries(sourcesData).forEach(([source, sourceResults]) => {
+      if (Array.isArray(sourceResults)) {
+        sourceResults.forEach((item, index) => {
+          let title = '';
+          let details = '';
+          
+          if (source === 'pubmed') {
+            title = item.title || 'No title';
+            details = `Authors: ${item.authors?.join(', ') || 'N/A'}, Journal: ${item.journal || 'N/A'}`;
+          } else if (source === 'uniprot') {
+            title = item.protein_name || 'Unknown protein';
+            details = `Accession: ${item.accession || 'N/A'}, Organism: ${item.organism || 'N/A'}`;
+          } else if (source === 'swissadme') {
+            title = `Molecule ${index + 1}`;
+            details = `SMILES: ${item.smiles?.[0] || 'N/A'}`;
+          } else {
+            title = 'Result';
+            details = JSON.stringify(item);
+          }
+          
+          csvContent += `"${source}","${source}","${title.replace(/"/g, '""')}","${details.replace(/"/g, '""')}"\n`;
+        });
+      }
+    });
+    
+    return csvContent;
+  };
+
+  // Convert results to plain text format
+  const convertResultsToText = (results) => {
+    let textContent = 'BIOMEDICAL RESEARCH RESULTS\n';
+    textContent += '='.repeat(50) + '\n\n';
+    textContent += `Generated on: ${new Date().toLocaleString()}\n\n`;
+    
+    const sourcesData = results.results || {};
+    const totalResults = Object.values(sourcesData).reduce((total, sourceResults) => {
+      if (Array.isArray(sourceResults)) {
+        return total + sourceResults.length;
+      }
+      return total;
+    }, 0);
+    
+    textContent += `SUMMARY:\n`;
+    textContent += `Total Results: ${totalResults}\n`;
+    textContent += `Sources Queried: ${Object.keys(sourcesData).length}\n`;
+    textContent += `Orchestration Method: ${results.orchestration_method || 'N/A'}\n\n`;
+    
+    Object.entries(sourcesData).forEach(([source, sourceResults]) => {
+      const sourceDisplayName = getSourceDisplayName(source);
+      textContent += `${sourceDisplayName.toUpperCase()}:\n`;
+      textContent += '-'.repeat(sourceDisplayName.length + 1) + '\n';
+      
+      if (sourceResults.error) {
+        textContent += `Error: ${sourceResults.error}\n\n`;
+        return;
+      }
+      
+      if (!Array.isArray(sourceResults) || sourceResults.length === 0) {
+        textContent += 'No results found.\n\n';
+        return;
+      }
+      
+      sourceResults.forEach((item, index) => {
+        textContent += `Result ${index + 1}:\n`;
+        
+        if (source === 'pubmed') {
+          textContent += `Title: ${item.title || 'No title'}\n`;
+          textContent += `Authors: ${item.authors?.join(', ') || 'N/A'}\n`;
+          textContent += `Journal: ${item.journal || 'N/A'}\n`;
+          textContent += `PMID: ${item.pmid || 'N/A'}\n`;
+          if (item.abstract) {
+            textContent += `Abstract: ${item.abstract.substring(0, 200)}...\n`;
+          }
+        } else if (source === 'uniprot') {
+          textContent += `Protein: ${item.protein_name || 'Unknown'}\n`;
+          textContent += `Accession: ${item.accession || 'N/A'}\n`;
+          textContent += `Organism: ${item.organism || 'N/A'}\n`;
+          textContent += `Length: ${item.sequence_length || 'N/A'} aa\n`;
+        } else if (source === 'swissadme') {
+          textContent += `SMILES: ${item.smiles?.[0] || 'N/A'}\n`;
+          textContent += `Note: Detailed molecular properties available in web interface\n`;
+        }
+        
+        textContent += '\n';
+      });
+    });
+    
+    if (results.ai_analysis) {
+      textContent += 'AI ANALYSIS:\n';
+      textContent += '-'.repeat(12) + '\n';
+      textContent += results.ai_analysis.replace(/#{1,6}\s+/g, '').replace(/\*\*(.*?)\*\*/g, '$1') + '\n';
+    }
+    
+    return textContent;
+  };
+
+  // Get source display name
+  const getSourceDisplayName = (source) => {
+    switch (source) {
+      case "pubmed":
+        return "PubMed Articles";
+      case "uniprot":
+        return "UniProt Proteins";
+      case "swissadme":
+        return "SwissADME Drug Properties";
+      default:
+        return source.toUpperCase();
+    }
   };
 
   return (

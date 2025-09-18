@@ -69,10 +69,7 @@ class SwissADMEAdapter:
            
             logger.info(f"Searching SwissADME for SMILES: {smiles[:50]}...")
 
-            print(smiles)
-            smiles = smiles.replace(" ", "")
-            print(smiles)
-            smiles_array = smiles.split(",")
+            smiles_array = smiles.split(", ")
             print(smiles_array)
             drug_properties = await self.scrape_swissadme(smiles=smiles_array, headless=False, timeout=80, download_csv=True, extract_images=True, output_dir="test")
  

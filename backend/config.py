@@ -26,7 +26,7 @@ class Config:
     PORT = int(os.getenv("PORT", "8000"))
     
     # AI Model Configuration
-    AI_MODEL = "gemini-2.0-flash"
+    AI_MODEL = "gemini-2.5-flash"
     AI_TEMPERATURE = 0.1
     AI_MAX_TOKENS = 1000
     
