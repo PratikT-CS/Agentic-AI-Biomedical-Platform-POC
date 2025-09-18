@@ -12,7 +12,7 @@ const ExportButton = styled.button`
   color: white;
 
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 12px 16px;
+  padding: 6px 8px;
   border-radius: 8px;
   font-size: 0.9rem;
   font-weight: 500;
@@ -85,19 +85,19 @@ function ExportButtonComponent({ onExport }) {
     {
       format: "json",
       label: "Export as JSON",
-      icon: <FileJson size={16} />,
+      icon: <FileJson size={14} />,
       description: "Structured data format",
     },
     {
       format: "csv",
       label: "Export as CSV",
-      icon: <FileSpreadsheet size={16} />,
+      icon: <FileSpreadsheet size={14} />,
       description: "Spreadsheet format",
     },
     {
       format: "txt",
       label: "Export as Text",
-      icon: <FileText size={16} />,
+      icon: <FileText size={14} />,
       description: "Plain text format",
     },
   ];
@@ -105,7 +105,7 @@ function ExportButtonComponent({ onExport }) {
   return (
     <ExportContainer>
       <ExportButton onClick={() => setIsOpen(!isOpen)}>
-        <Download size={16} />
+        <Download size={14} />
         Export Results
       </ExportButton>
 

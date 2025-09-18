@@ -86,7 +86,7 @@ const SourcesSection = styled.div`
 
 const SourcesGrid = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 8px;
 `;
 
@@ -319,8 +319,8 @@ function QueryForm({ onSubmit, availableSources, loading }) {
 
   const exampleQueries = [
     "COVID-19 vaccine efficacy",
-    "insulin resistance diabetes",
-    "cancer immunotherapy",
+    "Insulin resistance diabetes",
+    "Cancer immunotherapy",
     "Alzheimer's disease biomarkers",
     "CRISPR gene editing",
   ];
@@ -377,14 +377,14 @@ function QueryForm({ onSubmit, availableSources, loading }) {
               onClick={() => handleProcessingModeChange("ai")}
             >
               <Brain size={12} />
-              AI
+              AI-Powered Synthesis
             </CompactToggleOption>
             <CompactToggleOption
               active={formData.processingMode === "direct"}
               onClick={() => handleProcessingModeChange("direct")}
             >
               <Zap size={12} />
-              Direct
+              Direct Search
             </CompactToggleOption>
           </CompactToggleContainer>
         </FormTitleContainer>
@@ -426,8 +426,8 @@ function QueryForm({ onSubmit, availableSources, loading }) {
                       )}
                       {source.name.toUpperCase()}
                     </SourceCheckbox>
-                    <SourceType type={source.type}>{source.type}</SourceType>
                   </SourceHeader>
+                  <SourceType type={source.type}>{source.type.toUpperCase()}</SourceType>
                   <SourceDescription>{source.description}</SourceDescription>
                 </SourceCard>
               ))}

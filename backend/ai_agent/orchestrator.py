@@ -208,11 +208,17 @@ class AIOrchestrator:
             try:
                 results = json.loads(results_json)
                 
+                if results["results"]["swissadme"]:
+                    del results["rsults"]["swissadme"]["images"]
+                    del results["rsults"]["swissadme"]["boiled_egg_plot"]
+                
+                results = json.dumps(results)
+                
                 # Create a synthesis prompt
                 synthesis_prompt = f"""
                 Analyze and synthesize the following biomedical research results:
                 
-                {results_json}
+                {results}
                 
                 Provide a comprehensive analysis including:
                 1. Key findings summary from each data source

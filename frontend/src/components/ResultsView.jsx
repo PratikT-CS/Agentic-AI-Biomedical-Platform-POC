@@ -16,6 +16,7 @@ import {
   Minus,
 } from "lucide-react";
 import JsonView from "@uiw/react-json-view";
+import ReactMarkdown from "react-markdown";
 
 const ResultsContainer = styled.div`
   background: white;
@@ -1320,7 +1321,9 @@ function ResultsView({ results, status }) {
               <Brain size={20} />
               AI Analysis & Synthesis
             </AIAnalysisTitle>
-            <AIAnalysisContent>{results.ai_analysis}</AIAnalysisContent>
+            <AIAnalysisContent>
+              <ReactMarkdown>{results.ai_analysis}</ReactMarkdown>
+            </AIAnalysisContent>
           </AIAnalysisSection>
         )}
       </ResultsBody>

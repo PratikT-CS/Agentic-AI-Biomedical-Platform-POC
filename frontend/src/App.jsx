@@ -185,6 +185,7 @@ function App() {
   const [queryData, setQueryData] = useState({
     query: "",
     sources: ["pubmed", "uniprot", "swissadme"],
+    processingMode: "direct",
     maxResults: 10,
   });
 
@@ -220,6 +221,7 @@ function App() {
     setStatus("loading");
     setError(null);
     setResults(null);
+    setQueryData(formData);
 
     try {
       const response = await fetch("/api/query", {
