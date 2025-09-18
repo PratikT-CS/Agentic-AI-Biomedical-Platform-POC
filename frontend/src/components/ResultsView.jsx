@@ -1208,13 +1208,13 @@ function ResultsView({ results, status }) {
             )}
             {item.pmid && <MetaTag>PMID: {item.pmid}</MetaTag>}
           </ResultMeta>
-          {/* {item.abstract && (
+          {item.abstract && (
             <ResultDescription>
               {item.abstract.length > 200
                 ? `${item.abstract.substring(0, 200)}...`
                 : item.abstract}
             </ResultDescription>
-          )} */}
+          )}
           {item.url && (
             <ResultLink
               href={item.url}
