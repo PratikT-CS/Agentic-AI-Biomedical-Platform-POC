@@ -210,219 +210,343 @@ class PDFExportService {
     this.currentY += 8;
   }
 
-  // Add PubMed result
+  // Add PubMed result with enhanced hierarchy
   addPubMedResult(item) {
-    // Title
+    // Title with proper hierarchy
     if (item.title) {
-      this.addText(item.title, 11, true);
+      this.doc.setFontSize(12);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(33, 37, 41); // Dark gray for title
+      this.addText(item.title, 12, true, 1);
+      this.doc.setTextColor(0, 0, 0);
     }
     
-    // Meta information
-    const metaItems = [];
+    // Publication details in structured format
+    this.currentY += 2;
+    
+    // Authors
     if (item.authors && Array.isArray(item.authors) && item.authors.length > 0) {
-      metaItems.push(`Authors: ${item.authors.slice(0, 3).join(", ")}${item.authors.length > 3 ? ' et al.' : ''}`);
+      this.addKeyValue('Authors', item.authors.slice(0, 5).join(", ") + (item.authors.length > 5 ? ' et al.' : ''), 9, 1);
     }
+    
+    // Journal and publication info
     if (item.journal) {
-      metaItems.push(`Journal: ${item.journal}`);
+      this.addKeyValue('Journal', item.journal, 9, 1);
     }
+    
     if (item.publication_date) {
-      metaItems.push(`Date: ${item.publication_date}`);
+      this.addKeyValue('Published', item.publication_date, 9, 1);
     }
+    
     if (item.pmid) {
-      metaItems.push(`PMID: ${item.pmid}`);
+      this.addKeyValue('PMID', item.pmid, 9, 1);
     }
     
-    if (metaItems.length > 0) {
-      this.doc.setTextColor(108, 117, 125); // Gray color for meta
-      this.addText(metaItems.join(' | '), 9, false, 2);
-      this.doc.setTextColor(0, 0, 0); // Reset to black
-    }
-    
-    // Abstract
+    // Abstract with better formatting
     if (item.abstract) {
-      const abstract = item.abstract.length > 300 
-        ? `${item.abstract.substring(0, 300)}...` 
+      this.currentY += 2;
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(52, 58, 64);
+      this.doc.text('Abstract:', this.margin, this.currentY);
+      this.currentY += 4;
+      
+      const abstract = item.abstract.length > 400 
+        ? `${item.abstract.substring(0, 400)}...` 
         : item.abstract;
-      this.addText(abstract, 9, false, 2);
+      
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(73, 80, 87);
+      this.addText(abstract, 9, false, 1);
+      this.doc.setTextColor(0, 0, 0);
     }
     
-    // URL
+    // Source link with proper styling
     if (item.url) {
-      this.doc.setTextColor(79, 172, 254); // Blue color for links
-      this.addText(`View Article: ${item.url}`, 8, false, 2);
+      this.currentY += 3;
+      this.doc.setFontSize(9);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(0, 123, 255); // Bootstrap primary blue
+      this.doc.text('Source: ', this.margin, this.currentY);
+      
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(0, 123, 255);
+      this.doc.text(item.url, this.margin + 15, this.currentY);
       this.doc.setTextColor(0, 0, 0);
     }
   }
 
-  // Add UniProt result
+  // Add UniProt result with enhanced hierarchy
   addUniProtResult(item) {
-    // Protein name
+    // Protein name with proper hierarchy
     if (item.protein_name) {
-      this.addText(item.protein_name, 11, true);
-    }
-    
-    // Meta information
-    const metaItems = [];
-    if (item.accession) {
-      metaItems.push(`Accession: ${item.accession}`);
-    }
-    if (item.organism) {
-      metaItems.push(`Organism: ${item.organism}`);
-    }
-    if (item.sequence_length) {
-      metaItems.push(`Length: ${item.sequence_length} aa`);
-    }
-    if (item.reviewed !== undefined) {
-      metaItems.push(`Reviewed: ${item.reviewed ? "Yes" : "No"}`);
-    }
-    
-    if (metaItems.length > 0) {
-      this.doc.setTextColor(108, 117, 125);
-      this.addText(metaItems.join(' | '), 9, false, 2);
+      this.doc.setFontSize(12);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(33, 37, 41);
+      this.addText(item.protein_name, 12, true, 1);
       this.doc.setTextColor(0, 0, 0);
     }
     
-    // Gene names
+    this.currentY += 2;
+    
+    // Basic protein information
+    if (item.accession) {
+      this.addKeyValue('Accession', item.accession, 9, 1);
+    }
+    
+    if (item.organism) {
+      this.addKeyValue('Organism', item.organism, 9, 1);
+    }
+    
+    if (item.sequence_length) {
+      this.addKeyValue('Sequence Length', `${item.sequence_length} amino acids`, 9, 1);
+    }
+    
+    if (item.reviewed !== undefined) {
+      this.addKeyValue('Reviewed', item.reviewed ? "Yes (Swiss-Prot)" : "No (TrEMBL)", 9, 1);
+    }
+    
+    // Gene names with better formatting
     if (item.gene_names && Array.isArray(item.gene_names) && item.gene_names.length > 0) {
-      this.addKeyValue('Gene names', item.gene_names.join(", "), 9, 2);
+      this.addKeyValue('Gene Names', item.gene_names.join(", "), 9, 1);
     }
     
-    // Keywords
+    // Keywords with categorization
     if (item.keywords && Array.isArray(item.keywords) && item.keywords.length > 0) {
-      this.addKeyValue('Keywords', item.keywords.slice(0, 5).join(", "), 9, 2);
+      this.addKeyValue('Keywords', item.keywords.slice(0, 8).join(", "), 9, 1);
     }
     
-    // URL
+    // Function description if available
+    if (item.function_description) {
+      this.currentY += 2;
+      this.doc.setFontSize(10);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(52, 58, 64);
+      this.doc.text('Function:', this.margin, this.currentY);
+      this.currentY += 4;
+      
+      const functionText = item.function_description.length > 300 
+        ? `${item.function_description.substring(0, 300)}...` 
+        : item.function_description;
+      
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(73, 80, 87);
+      this.addText(functionText, 9, false, 1);
+      this.doc.setTextColor(0, 0, 0);
+    }
+    
+    // Source link with proper styling
     if (item.url) {
-      this.doc.setTextColor(79, 172, 254);
-      this.addText(`View Protein: ${item.url}`, 8, false, 2);
+      this.currentY += 3;
+      this.doc.setFontSize(9);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(0, 123, 255);
+      this.doc.text('Source: ', this.margin, this.currentY);
+      
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setTextColor(0, 123, 255);
+      this.doc.text(item.url, this.margin + 15, this.currentY);
       this.doc.setTextColor(0, 0, 0);
     }
   }
 
-  // Add SwissADME result with ResultsView styling
+  // Add SwissADME result with enhanced table formatting
   addSwissADMEResult(item) {
     const smiles = item.smiles || [];
     const molecules = smiles.length > 0 ? smiles : ["Unknown"];
 
-    // Boiled Egg Plot section with yellow gradient background (matching ResultsView)
+    // Boiled Egg Plot section with enhanced styling
     if (item.boiled_egg_plot) {
-      this.checkNewPage(15);
+      this.checkNewPage(20);
       this.doc.setFillColor(255, 243, 205); // Light yellow background
-      this.doc.rect(this.margin - 3, this.currentY - 3, 176, 12, 'F');
+      this.doc.rect(this.margin - 3, this.currentY - 3, 176, 15, 'F');
       this.doc.setTextColor(133, 100, 4); // Orange-brown color
-      this.addText('🥚 Boiled Egg Plot (ADME Properties): Available in web interface', 10, true, 2);
+      this.doc.setFontSize(11);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text('🥚 Boiled Egg Plot (ADME Properties)', this.margin, this.currentY + 3);
+      this.doc.setFont('helvetica', 'normal');
+      this.doc.setFontSize(9);
+      this.doc.text('Visual representation of drug absorption and distribution properties', this.margin, this.currentY + 7);
+      this.doc.text('Available in web interface for interactive viewing', this.margin, this.currentY + 10);
       this.doc.setTextColor(0, 0, 0);
-      this.currentY += 5;
+      this.currentY += 8;
     }
 
-    // Process each molecule with card-like styling
+    // Process each molecule with enhanced table structure
     molecules.forEach((smile, index) => {
-      this.checkNewPage(30);
+      this.checkNewPage(40);
       
-      // Molecule card background (light gray)
-      this.doc.setFillColor(248, 249, 250);
-      const cardHeight = 25;
-      this.doc.rect(this.margin - 3, this.currentY - 3, 176, cardHeight, 'F');
+      // Molecule header with enhanced styling
+      this.doc.setFillColor(52, 144, 220); // Professional blue
+      this.doc.rect(this.margin - 3, this.currentY - 3, 176, 12, 'F');
+      this.doc.setTextColor(255, 255, 255);
+      this.doc.setFontSize(12);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.text(`Molecule ${index + 1}`, this.margin, this.currentY + 3);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += 8;
       
-      // Molecule header with blue gradient styling
-      this.doc.setFillColor(79, 172, 254); // Blue background for header
-      this.doc.rect(this.margin - 3, this.currentY - 3, 176, 8, 'F');
-      this.doc.setTextColor(255, 255, 255); // White text
-      this.addText(`Molecule ${index + 1}`, 10, true, 2);
-      this.doc.setTextColor(0, 0, 0); // Reset to black
-      this.currentY += 3;
-      
-      // SMILES string with monospace font and background
+      // SMILES string with enhanced formatting
       if (smile && smile !== "Unknown") {
-        this.doc.setFillColor(233, 236, 239); // Light gray background for SMILES
-        this.doc.rect(this.margin + 2, this.currentY - 1, 170, 6, 'F');
+        this.doc.setFillColor(240, 248, 255); // Light blue background
+        this.doc.rect(this.margin, this.currentY - 2, 170, 8, 'F');
+        this.doc.setFontSize(9);
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.setTextColor(52, 58, 64);
+        this.doc.text('SMILES:', this.margin + 2, this.currentY + 1);
         this.doc.setFont('courier', 'normal');
-        this.doc.setTextColor(73, 80, 87); // Dark gray text
-        this.addText(`SMILES: ${smile}`, 8, false, 4);
+        this.doc.setTextColor(73, 80, 87);
+        this.doc.text(smile, this.margin + 2, this.currentY + 4);
         this.doc.setFont('helvetica', 'normal');
         this.doc.setTextColor(0, 0, 0);
+        this.currentY += 6;
       }
-      this.currentY += 5;
 
-      // Add property sections with enhanced styling
-      this.addMoleculeSection('Physicochemical Properties', item.physicochemical_properties, smile, 4);
-      this.addMoleculeSection('Lipophilicity', item.lipophilicity, smile, 4);
-      this.addMoleculeSection('Water Solubility', item.water_solubility, smile, 4);
-      this.addMoleculeSection('Pharmacokinetics', item.pharmacokinetics, smile, 4);
-      this.addMoleculeSection('Drug Likeness', item.druglikeness, smile, 4);
-      this.addMoleculeSection('Medicinal Chemistry', item.medicinal_chemistry, smile, 4);
+      // Create comprehensive property tables
+      this.addSwissADMETable('Physicochemical Properties', item.physicochemical_properties, smile);
+      this.addSwissADMETable('Lipophilicity', item.lipophilicity, smile);
+      this.addSwissADMETable('Water Solubility', item.water_solubility, smile);
+      this.addSwissADMETable('Pharmacokinetics', item.pharmacokinetics, smile);
+      this.addSwissADMETable('Drug Likeness', item.druglikeness, smile);
+      this.addSwissADMETable('Medicinal Chemistry', item.medicinal_chemistry, smile);
 
-      // Images note with gray styling
+      // Enhanced image information
       if (item.images && item.images[smile]) {
-        this.doc.setFillColor(248, 249, 250); // Light background
-        this.doc.rect(this.margin + 2, this.currentY - 1, 170, 6, 'F');
+        this.currentY += 3;
+        this.doc.setFillColor(248, 249, 250);
+        this.doc.rect(this.margin, this.currentY - 2, 170, 10, 'F');
+        this.doc.setFontSize(9);
+        this.doc.setFont('helvetica', 'bold');
+        this.doc.setTextColor(52, 58, 64);
+        this.doc.text('📊 Molecular Visualizations:', this.margin + 2, this.currentY + 1);
+        this.doc.setFont('helvetica', 'normal');
         this.doc.setTextColor(108, 117, 125);
-        this.addText('📊 Molecular structure images and radar plots available in web interface', 8, false, 4);
+        this.doc.text('• 2D molecular structure', this.margin + 2, this.currentY + 4);
+        this.doc.text('• 3D molecular visualization', this.margin + 2, this.currentY + 6);
+        this.doc.text('• ADME radar plot', this.margin + 2, this.currentY + 8);
+        this.doc.text('Available in web interface for interactive viewing', this.margin + 2, this.currentY + 10);
         this.doc.setTextColor(0, 0, 0);
-        this.currentY += 5;
+        this.currentY += 8;
       }
+      
+      this.currentY += 5; // Space between molecules
     });
   }
 
-  // Helper method to add molecule property sections with ResultsView styling
-  addMoleculeSection(sectionName, dataObject, smile, indent) {
+  // Enhanced method to add SwissADME property tables
+  addSwissADMETable(sectionName, dataObject, smile) {
     if (!dataObject || !dataObject[smile]) return;
     
-    this.checkNewPage(20);
+    this.checkNewPage(25);
     
-    // Section header with icon and color
+    // Section header with enhanced styling
     const sectionIcons = {
       'Physicochemical Properties': '💊',
-      'Lipophilicity': '💊', 
-      'Water Solubility': '💊',
+      'Lipophilicity': '🧪', 
+      'Water Solubility': '💧',
       'Pharmacokinetics': '🧠',
-      'Drug Likeness': '💊',
+      'Drug Likeness': '✅',
       'Medicinal Chemistry': '🧬'
     };
     
     const icon = sectionIcons[sectionName] || '📊';
-    this.doc.setTextColor(44, 62, 80); // Dark blue-gray
-    this.addText(`${icon} ${sectionName}:`, 9, true, indent);
+    
+    // Section header background
+    this.doc.setFillColor(52, 58, 64); // Dark gray header
+    this.doc.rect(this.margin, this.currentY - 2, 170, 8, 'F');
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'bold');
+    this.doc.text(`${icon} ${sectionName}`, this.margin + 2, this.currentY + 2);
     this.doc.setTextColor(0, 0, 0);
+    this.currentY += 6;
     
     const properties = dataObject[smile];
     if (typeof properties === 'object' && properties !== null) {
-      // Create property grid effect with alternating backgrounds
-      let propertyIndex = 0;
-      Object.entries(properties).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          // Alternating background colors for properties
-          if (propertyIndex % 2 === 0) {
-            this.doc.setFillColor(248, 249, 250); // Light gray
-          } else {
-            this.doc.setFillColor(255, 255, 255); // White
-          }
-          this.doc.rect(this.margin + indent, this.currentY - 1, 160, 6, 'F');
-          
-          const formattedKey = key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
-          const formattedValue = this.formatPropertyValue(key, value);
-          
-          // Property name in gray
-          this.doc.setTextColor(108, 117, 125);
-          this.doc.setFontSize(8);
-          this.doc.setFont('helvetica', 'normal');
-          this.doc.text(formattedKey + ':', this.margin + indent + 2, this.currentY);
-          
-          // Property value in dark color
-          this.doc.setTextColor(44, 62, 80);
-          this.doc.setFont('helvetica', 'bold');
-          const keyWidth = this.doc.getTextWidth(formattedKey + ': ');
-          this.doc.text(formattedValue, this.margin + indent + 2 + keyWidth, this.currentY);
-          
-          this.doc.setTextColor(0, 0, 0); // Reset
-          this.doc.setFont('helvetica', 'normal');
-          this.currentY += this.lineHeight;
-          propertyIndex++;
+      // Create table structure
+      const entries = Object.entries(properties).filter(([key, value]) => 
+        value !== undefined && value !== null && value !== ''
+      );
+      
+      if (entries.length === 0) {
+        this.doc.setFontSize(8);
+        this.doc.setTextColor(108, 117, 125);
+        this.doc.text('No data available', this.margin + 2, this.currentY + 2);
+        this.doc.setTextColor(0, 0, 0);
+        this.currentY += 4;
+        return;
+      }
+      
+      // Table header
+      this.doc.setFillColor(240, 248, 255); // Light blue header
+      this.doc.rect(this.margin, this.currentY - 1, 170, 6, 'F');
+      this.doc.setFontSize(8);
+      this.doc.setFont('helvetica', 'bold');
+      this.doc.setTextColor(52, 58, 64);
+      this.doc.text('Property', this.margin + 2, this.currentY + 2);
+      this.doc.text('Value', this.margin + 90, this.currentY + 2);
+      this.doc.setTextColor(0, 0, 0);
+      this.currentY += 4;
+      
+      // Table rows with alternating colors
+      entries.forEach(([key, value], index) => {
+        const formattedKey = key.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+        const formattedValue = this.formatPropertyValue(key, value);
+        
+        // Alternating row colors
+        if (index % 2 === 0) {
+          this.doc.setFillColor(248, 249, 250); // Light gray
+        } else {
+          this.doc.setFillColor(255, 255, 255); // White
         }
+        this.doc.rect(this.margin, this.currentY - 1, 170, 6, 'F');
+        
+        // Property name
+        this.doc.setFontSize(8);
+        this.doc.setFont('helvetica', 'normal');
+        this.doc.setTextColor(73, 80, 87);
+        this.doc.text(formattedKey, this.margin + 2, this.currentY + 2);
+        
+        // Property value with color coding based on type
+        this.doc.setFont('helvetica', 'bold');
+        if (typeof value === 'number') {
+          this.doc.setTextColor(40, 167, 69); // Green for numbers
+        } else if (typeof value === 'boolean') {
+          this.doc.setTextColor(value ? 40 : 220, value ? 167 : 53, value ? 69 : 53); // Green/Red for boolean
+        } else {
+          this.doc.setTextColor(52, 58, 64); // Dark for text
+        }
+        
+        // Handle long values by wrapping
+        const maxWidth = 70;
+        const valueWidth = this.doc.getTextWidth(formattedValue);
+        if (valueWidth > maxWidth) {
+          const words = formattedValue.split(' ');
+          let line = '';
+          let yOffset = 0;
+          
+          words.forEach(word => {
+            const testLine = line + (line ? ' ' : '') + word;
+            if (this.doc.getTextWidth(testLine) > maxWidth && line) {
+              this.doc.text(line, this.margin + 90, this.currentY + 2 + yOffset);
+              line = word;
+              yOffset += 3;
+            } else {
+              line = testLine;
+            }
+          });
+          if (line) {
+            this.doc.text(line, this.margin + 90, this.currentY + 2 + yOffset);
+          }
+        } else {
+          this.doc.text(formattedValue, this.margin + 90, this.currentY + 2);
+        }
+        
+        this.doc.setTextColor(0, 0, 0);
+        this.currentY += 4;
       });
     }
-    this.currentY += 3;
+    this.currentY += 3; // Space after table
   }
 
   // Add generic result for unknown data types
@@ -482,42 +606,147 @@ class PDFExportService {
     return String(value);
   }
 
-  // Add AI analysis with ResultsView styling
+  // Add AI analysis with enhanced formatting and hierarchy
   addAIAnalysis(aiAnalysis) {
     if (!aiAnalysis) return;
     
-    this.checkNewPage(30);
+    this.checkNewPage(40);
     
-    // Add AI Analysis section with purple gradient background (matching ResultsView)
+    // Enhanced AI Analysis header with gradient effect
     this.doc.setFillColor(111, 66, 193); // Purple background
-    this.doc.rect(this.margin - 5, this.currentY - 5, 180, 25, 'F');
+    this.doc.rect(this.margin - 5, this.currentY - 5, 180, 20, 'F');
     
-    // Add title with white text on purple background
-    this.doc.setFontSize(14);
+    // Add title with enhanced styling
+    this.doc.setFontSize(16);
     this.doc.setFont('helvetica', 'bold');
-    this.doc.setTextColor(255, 255, 255); // White text
-    this.doc.text('🧠 AI Analysis & Synthesis', this.margin, this.currentY + 5);
-    this.currentY += 20;
+    this.doc.setTextColor(255, 255, 255);
+    this.doc.text('🧠 AI Analysis & Synthesis', this.margin, this.currentY + 3);
     
-    // Add content background (light purple)
-    this.doc.setFillColor(240, 235, 255); // Light purple background
-    const contentHeight = Math.min(50, this.pageHeight - this.currentY - 20);
+    // Add subtitle
+    this.doc.setFontSize(10);
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.text('Comprehensive analysis of biomedical research findings', this.margin, this.currentY + 8);
+    this.currentY += 15;
+    
+    // Parse and format markdown content with proper hierarchy
+    const formattedContent = this.parseMarkdownContent(aiAnalysis);
+    
+    // Add content with enhanced background
+    this.doc.setFillColor(248, 250, 252); // Light gray background
+    const contentHeight = Math.min(80, this.pageHeight - this.currentY - 20);
     this.doc.rect(this.margin - 3, this.currentY - 3, 176, contentHeight, 'F');
     
-    // Convert markdown to plain text for PDF
-    const plainText = String(aiAnalysis)
-      .replace(/#{1,6}\s+/g, '') // Remove markdown headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-      .replace(/`(.*?)`/g, '$1') // Remove code markdown
-      .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1') // Remove links, keep text
-      .replace(/\n\s*\n/g, '\n') // Clean up extra newlines
-      .trim();
+    // Render formatted content
+    this.renderFormattedContent(formattedContent);
     
-    this.doc.setTextColor(44, 62, 80); // Dark text for readability
-    this.addText(plainText, 10);
-    this.doc.setTextColor(0, 0, 0); // Reset to black
     this.currentY += 5;
+  }
+  
+  // Parse markdown content into structured format
+  parseMarkdownContent(content) {
+    const lines = String(content).split('\n');
+    const parsed = [];
+    
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+      
+      if (!line) continue;
+      
+      // Headers
+      if (line.startsWith('#')) {
+        const level = line.match(/^#+/)[0].length;
+        const text = line.replace(/^#+\s*/, '');
+        parsed.push({ type: 'header', level, text, bold: true });
+      }
+      // Bold text
+      else if (line.includes('**')) {
+        const parts = line.split(/(\*\*.*?\*\*)/g);
+        const formattedParts = parts.map(part => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return { type: 'text', text: part.slice(2, -2), bold: true };
+          }
+          return { type: 'text', text: part, bold: false };
+        });
+        parsed.push({ type: 'paragraph', parts: formattedParts });
+      }
+      // Lists
+      else if (line.startsWith('- ') || line.startsWith('* ')) {
+        parsed.push({ type: 'list', text: line.substring(2), level: 1 });
+      }
+      else if (line.match(/^\s+- /) || line.match(/^\s+\* /)) {
+        const level = Math.floor((line.length - line.trimStart().length) / 2) + 1;
+        parsed.push({ type: 'list', text: line.trim().substring(2), level });
+      }
+      // Numbered lists
+      else if (line.match(/^\d+\./)) {
+        parsed.push({ type: 'numbered', text: line.replace(/^\d+\.\s*/, ''), number: line.match(/^(\d+)/)[1] });
+      }
+      // Regular paragraphs
+      else {
+        parsed.push({ type: 'paragraph', text: line });
+      }
+    }
+    
+    return parsed;
+  }
+  
+  // Render formatted content with proper hierarchy
+  renderFormattedContent(content) {
+    content.forEach(item => {
+      this.checkNewPage(15);
+      
+      switch (item.type) {
+        case 'header':
+          this.doc.setFontSize(12 - item.level);
+          this.doc.setFont('helvetica', 'bold');
+          this.doc.setTextColor(52, 58, 64);
+          this.doc.text(item.text, this.margin + (item.level - 1) * 5, this.currentY + 2);
+          this.currentY += 6;
+          break;
+          
+        case 'paragraph':
+          if (item.parts) {
+            // Mixed formatting paragraph
+            let x = this.margin;
+            item.parts.forEach(part => {
+              this.doc.setFont('helvetica', part.bold ? 'bold' : 'normal');
+              this.doc.setTextColor(73, 80, 87);
+              this.doc.setFontSize(9);
+              this.doc.text(part.text, x, this.currentY + 2);
+              x += this.doc.getTextWidth(part.text);
+            });
+          } else {
+            // Regular paragraph
+            this.doc.setFontSize(9);
+            this.doc.setFont('helvetica', 'normal');
+            this.doc.setTextColor(73, 80, 87);
+            this.addText(item.text, 9, false, 0);
+          }
+          this.currentY += 4;
+          break;
+          
+        case 'list':
+          this.doc.setFontSize(9);
+          this.doc.setFont('helvetica', 'normal');
+          this.doc.setTextColor(73, 80, 87);
+          const indent = this.margin + (item.level - 1) * 8;
+          this.doc.text('•', indent, this.currentY + 2);
+          this.doc.text(item.text, indent + 4, this.currentY + 2);
+          this.currentY += 4;
+          break;
+          
+        case 'numbered':
+          this.doc.setFontSize(9);
+          this.doc.setFont('helvetica', 'normal');
+          this.doc.setTextColor(73, 80, 87);
+          this.doc.text(`${item.number}.`, this.margin, this.currentY + 2);
+          this.doc.text(item.text, this.margin + 8, this.currentY + 2);
+          this.currentY += 4;
+          break;
+      }
+    });
+    
+    this.doc.setTextColor(0, 0, 0); // Reset to black
   }
 
   // Generate and download PDF

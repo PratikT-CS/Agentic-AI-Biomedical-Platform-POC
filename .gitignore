@@ -120,7 +120,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -236,11 +235,9 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
 .env.development.local
 .env.test.local
 .env.production.local
-.env.local
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -319,8 +316,6 @@ temp/
 tmp/
 
 # API Keys and secrets
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
@@ -417,3 +412,4 @@ docs/build/
 # Local development
 .local/
 local/
+config.bat
