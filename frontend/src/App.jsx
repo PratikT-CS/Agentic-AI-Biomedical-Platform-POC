@@ -575,7 +575,7 @@ function App() {
                       height: "40px",
                       margin: "0 auto 20px auto",
                       borderTopColor: "#856404",
-                      animation: "spin 1s linear infinite, pulse 2s infinite",
+                      // animation: "spin 1s linear infinite, pulse 2s infinite",
                     }}
                   />
                   <div style={{ fontWeight: "500", marginBottom: "10px" }}>
